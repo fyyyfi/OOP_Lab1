@@ -19,7 +19,7 @@ pom.xml.releaseBackup
 .settings/
 .project
 .classpath
-
+.gitkeep
 # OS
 .DS_Store
 Thumbs.db
