@@ -1,5 +1,6 @@
-package ua.tax.model;
-
+package ua.tax;
+import ua.tax.model.SalaryIncome;
+import ua.tax.model.TaxType;
 import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
