@@ -1,67 +1,53 @@
 package ua.tax.model;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
-import java.util.Objects;
 
-public abstract class Income {
-    protected BigDecimal amount;
-    protected String description;
-    protected LocalDate date
+// основна зп 
+ 
+public class SalaryIncome extends Income {
+    private final boolean isMainWorkplace;
+    private final String employerName;
 
-    protected Income(BigDecimal amount, String description, LocalDate date) {
-        if (amount == null || amount.compareTo(BigDecimal.ZERO) < 0) {
-            throw new IllegalArgumentException("Amount cannot be null or negative");
-        }
-        if (description == null || description.trim().isEmpty()) {
-            throw new IllegalArgumentException("Description cannot be null or empty");
-        }
-        if (date == null) {
-            throw new IllegalArgumentException("Date cannot be null");
-        }
+    public SalaryIncome(BigDecimal amount, String description, LocalDate date, 
+                       boolean isMainWorkplace, String employerName) {
+        super(amount, description, date);
+        this.isMainWorkplace = isMainWorkplace;
+        this.employerName = employerName != null ? employerName : "Unknown employer";
+    }
+
+    @Override
+    public BigDecimal calculateTax() {
+        // пдфо + військовий збір 
+        BigDecimal incomeTaxRate = BigDecimal.valueOf(TaxType.INCOME_TAX.getDefaultRate());
+        BigDecimal militaryTaxRate = BigDecimal.valueOf(TaxType.MILITARY_TAX.getDefaultRate());
         
-        this.amount = amount
-        this.description = description
-        this.date = date
-    }
-
-    
-    public abstract BigDecimal calculateTax();
-
-   
-    public abstract TaxType getTaxType();
-
-    
-    public BigDecimal getAmount() {
-        return amount;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public LocalDate getDate() {
-        return date;
+        BigDecimal totalTaxRate = incomeTaxRate.add(militaryTaxRate);
+        
+        return amount.multiply(totalTaxRate)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) return true;
-        if (obj == null || getClass() != obj.getClass()) return false;
-        Income income = (Income) obj;
-        return Objects.equals(amount, income.amount) &&
-               Objects.equals(description, income.description) &&
-               Objects.equals(date, income.date);
+    public TaxType getTaxType() {
+        return TaxType.INCOME_TAX;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(amount, description, dae);
+    public boolean isMainWorkplace() {
+        return isMainWorkplace;
+    }
+
+    public String getEmployerName() {
+        return employerName;
     }
 
     @Override
     public String toString() {
-        return String.format("%s: %s UAH (%s)", 
-            description, amount, date);
+        return String.format("Salary from %s (%s): %s UAH (%s)", 
+            employerName,
+            isMainWorkplace ? "main" : "additional",
+            amount, 
+            date);
     }
 }
